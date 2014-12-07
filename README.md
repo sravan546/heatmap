@@ -6,8 +6,8 @@ This the heatmap algorithm to be used for Howie project .This has bee developed 
 Usage.
 Object model for inpit data is 
 
-{ label: "Firefox",  hearts:0,heartbreaks:1 ,weight: 29670528, children: [{ label: "Firefox/xul.dll",  hearts:300,heartbreaks:5000 ,weight: 11996120
-  }, 
+{ label: "Firefox",  hearts:0,heartbreaks:1 ,weight: 29670528, children:
+[{ label: "Firefox/xul.dll",  hearts:300,heartbreaks:5000 ,weight: 11996120 }, 
   { label: "Firefox/xpcom.dll",  hearts:0,heartbreaks:100 ,weight: 17880
   }, 
   { label: "Firefox/updater.ini",  hearts:0,heartbreaks:50 ,weight: 707
