@@ -33,10 +33,9 @@ Object model for inpit data is
 3)set json data using treemodel like below
 
     var treeModel = new treemodel.JSONTreeModel(new Function("return "+data)()); //where data is the json data conforming to above model
-    
     heatMap.setTreeModel(treeModel);
     
-4)Then call compute.getRoot() on heatmap object like below to get the output
+4)Then call compute.getRoot(width,height) on heatmap object like below to get the output .
 
-    heatMap.compute().getRoot();
+    heatMap.compute(300,700).getRoot();
 
