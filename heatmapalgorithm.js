@@ -10,19 +10,14 @@
  * Sravana K Cheriyala, 2014-12-07
  *
  * Modified below 
-      1.Added color information within the rectangle object
-      2.Compute will return parent rectangle object
-      3.Added method to take screen sizes 
-
- * 
+ *    1.Added color information within the rectangle object
+ *    2.Compute will return parent rectangle object
+ *    3.Added method to take screen sizes 
+ *
  * Published under "Eclipse Public License - v 1.0"
  * http://www.eclipse.org/legal/epl-v10.html
  */
  /**
-
-
-
-
 
 /*
  * Tree Map widget which renders a weighted tree model
@@ -57,7 +52,7 @@ module.exports.TreeMap = function() {
   var colorProvider = {
   getColor: function(node) {
 
-  var hearts     = node.hearts;
+    var hearts     = node.hearts;
     var heartBreaks = node.heartbreaks;
 
 
@@ -216,6 +211,9 @@ module.exports.TreeMap = function() {
     }
   };
 
+
+
+
   /*
    * invoked when rendering takes place without
    * a tree model assigned, respectively when no rectangles
@@ -249,7 +247,7 @@ module.exports.TreeMap = function() {
       } while (runner = runner.offsetParent);
     }
     if (currentRect) {
-      if (currentRect.contains(lx, ly)) {
+      if (contains(lx, ly,currentRect)) {
         // inside of highlighted rectangle already
         return;
       } else {
@@ -301,7 +299,7 @@ module.exports.TreeMap = function() {
    */
   this.compute = function() {
     if (treeModel && currentNode) {
-      rectangles = layout.layout(treeModel, currentNode,300 , 700);
+      rectangles = layout.layout(treeModel, currentNode,600 , 400);
       currentRect = undefined;
     }
     return rectangles;
@@ -352,7 +350,7 @@ module.exports.TreeMap = function() {
         var i;
         for (i = children.length-1; i>=0; i--) {
           var candidate = children[i];
-          if (candidate.contains(x, y)) {
+          if (contains(x, y,candidate)) {
             result = candidate;
             found = true;
             break;
@@ -524,9 +522,9 @@ function JSONTreeModel(treeRep) {
   /*
    * returns the weight of the given node
    */  
-  this.getWeight = function(node) {
-    if (node.weight) {
-      return node.weight;
+  this.getViews = function(node) {
+    if (node.views) {
+      return node.views;
     } else {
       return 0;
     }
@@ -614,7 +612,7 @@ function XMLTreeModel(xmlDocument) {
   /*
    * returns the weight of the given node
    */  
-  this.getWeight = function(node) {
+  this.getViews = function(node) {
     if (node.getAttribute) {
       return node.getAttribute("weight");
     } else {
@@ -648,46 +646,12 @@ function _Rectangle(node,x,y,width,height,color) {
   this.width = width;
   this.height = height;
   this.color=color;
+  this.label=node.label;
   
   /** privileged methods */
 
-  /*
-   * indicates if this rectangle contains
-   * the given coordinates
-   */  
-  this.contains = function(x,y) {
-    var t = x-this.x;
-    if (t >= 0 && t < this.width) {
-      t = y-this.y;
-      return (t >= 0 && t < this.height);
-    } else {
-      return false;
-    }
-  };
   
-  /*
-   * splits the rectangle into two rectangles
-   * with the given proportional fraction (must
-   * be >0 and <1)
-   */
-  this.split = function(fraction) {
-    if (fraction <= 0 || fraction >= 1) {
-      throw "illegal fraction "+fraction;
-    }
-    var result = [];
-    if (this.width < this.height) {
-      var nh = this.height * fraction;
-      result.push(new _Rectangle(this.node, this.x, this.y, this.width, nh));
-      result.push(new _Rectangle(this.node, this.x, this.y+nh, this.width, this.height-nh));
-    } else {
-      var nw = this.width * fraction;
-      result.push(new _Rectangle(this.node, this.x, this.y, nw, this.height));
-      result.push(new _Rectangle(this.node, this.x+nw, this.y, this.width-nw, this.height))
-    }
-    return result;
-  };
-  
-}
+};
 
 /*
  * weight comparator used for building the rectangles
@@ -704,7 +668,7 @@ function _WeightComparator(treeModel) {
    * sorts nodes based on their weight
    */
   this.sortFunction = function(a, b) {
-    return model.getWeight(b) - model.getWeight(a);
+    return model.getViews(b) - model.getViews(a);
   }
 
   /*
@@ -714,7 +678,7 @@ function _WeightComparator(treeModel) {
     return model;
   }
 
-}
+};
 
 /*
  * squarified layout, basing on the ideas of Wijk et al
@@ -727,6 +691,41 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
   var maxDepth = maximumDepth;
   
 
+  /*
+   * indicates if this rectangle contains
+   * the given coordinates
+   */  
+  function contains(x,y,rectangle) {
+    var t = x-rectangle.x;
+    if (t >= 0 && t < rectangle.width) {
+      t = y-rectangle.y;
+      return (t >= 0 && t < rectangle.height);
+    } else {
+      return false;
+    }
+  };
+  
+  /*
+   * splits the rectangle into two rectangles
+   * with the given proportional fraction (must
+   * be >0 and <1)
+   */
+   function spliter(fraction,rectangle) {
+    if (fraction <= 0 || fraction >= 1) {
+      throw "illegal fraction "+fraction;
+    }
+    var result = [];
+    if (rectangle.width < rectangle.height) {
+      var nh = rectangle.height * fraction;
+      result.push(new _Rectangle(rectangle.node, rectangle.x, rectangle.y, rectangle.width, nh));
+      result.push(new _Rectangle(rectangle.node, rectangle.x, rectangle.y+nh, rectangle.width, rectangle.height-nh));
+    } else {
+      var nw = rectangle.width * fraction;
+      result.push(new _Rectangle(rectangle.node, rectangle.x, rectangle.y, nw, rectangle.height));
+      result.push(new _Rectangle(rectangle.node, rectangle.x+nw, rectangle.y, rectangle.width-nw, rectangle.height))
+    }
+    return result;
+  };
 
   /** privileged methods **/
 
@@ -753,9 +752,9 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
         var nodes = treeModel.getChildren(n);
         if (nodes.length > 2) {
           nodes = nodes.sort(comparator.sortFunction);
-          _layoutNodes(result, rectangle, rectangle, comparator, nodes, 0, nodes.length, treeModel.getWeight(n), depth);
+          _layoutNodes(result, rectangle, rectangle, comparator, nodes, 0, nodes.length, treeModel.getViews(n), depth);
         } else {
-          _slice(result, rectangle, rectangle, comparator, nodes, 0, nodes.length, treeModel.getWeight(n), depth);
+          _slice(result, rectangle, rectangle, comparator, nodes, 0, nodes.length, treeModel.getViews(n), depth);
         }
       }
     }
@@ -772,7 +771,7 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
       var treeModel = comparator.getTreeModel();
       do {
         var n = nodes[i++];
-        var nodeWeight = treeModel.getWeight(n);
+        var nodeWeight = treeModel.getViews(n);
         sum += nodeWeight;
         rect[0] = rectangle.width;
         rect[1] = rectangle.height;
@@ -781,10 +780,10 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
         last = aspectRatio;
         aspectRatio = rect[0]>rect[1]?rect[0]/rect[1]:rect[1]/rect[0];
         if (aspectRatio > last) {
-          sum -= treeModel.getWeight(nodes[--i]);
+          sum -= treeModel.getViews(nodes[--i]);
           var frac = sum/weight;
           if (frac > 0 && frac < 1) {
-            var r = rectangle.split(frac);
+            var r = spliter(frac,rectangle);
             _layoutNodes(result, parent, r[0], comparator, nodes, start, i, sum, depth);
             _layoutNodes(result, parent, r[1], comparator, nodes, i, end, weight-sum, depth);
             return;
@@ -810,7 +809,7 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
       var i;
       for (i = start; i < end && sy < maxy; i++) {
         var c = nodes[i];
-        var wc = treeModel.getWeight(c);
+        var wc = treeModel.getViews(c);
         var step = (i!=last)?Math.round(rectangle.height*wc/weight):(rectangle.height-(sy-rectangle.y));
         if (step > 0) {
           var child = new _Rectangle(c, sx, sy, rectangle.width, step,colorProvider.getColor(c));
@@ -837,7 +836,7 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
       var i;
       for (i = start; i < end && sx < maxx; i++) {
         var c = nodes[i];
-        var wc = treeModel.getWeight(c);
+        var wc = treeModel.getViews(c);
         var step = (i!=last)?Math.round(rectangle.width*wc/weight):(rectangle.width-(sx-rectangle.x));
         if (step > 0) {
           var child = new _Rectangle(c, sx, sy, step, rectangle.height,colorProvider.getColor(c));

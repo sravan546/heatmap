@@ -51,9 +51,9 @@ module.exports.JSONTreeModel = function (treeRep) {
   /*
    * returns the weight of the given node
    */  
-  this.getWeight = function(node) {
-    if (node.weight) {
-      return node.weight;
+  this.getViews = function(node) {
+    if (node.views) {
+      return node.views;
     } else {
       return 0;
     }

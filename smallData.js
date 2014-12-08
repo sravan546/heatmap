@@ -1,14 +1,48 @@
-{ label: "Firefox",  hearts:0,heartbreaks:1 ,weight: 29670528, children: [{ label: "Firefox/xul.dll",  hearts:300,heartbreaks:5000 ,weight: 11996120
+{ 
+  label: "Firefox",  hearts:0,heartbreaks:1 ,views: 6, 
+  children: [
+  { label: "1",  hearts:300,heartbreaks:100 ,views: 1,post:{
+    title:"",
+    body:"",
+    comment:[],
+    hashtags:""
+  }
   }, 
-  { label: "Firefox/xpcom.dll",  hearts:0,heartbreaks:100 ,weight: 17880
+  { label: "2",  hearts:300,heartbreaks:100 ,views: 1,post:{
+    title:"",
+    body:"",
+    comment:[],
+    hashtags:""
+  }
   }, 
-  { label: "Firefox/updater.ini",  hearts:0,heartbreaks:50 ,weight: 707
+  { label: "3",  hearts:0,heartbreaks:100 ,views: 1,post:{
+    title:"",
+    body:"",
+    comment:{},
+    hashtags:""
+  }
   }, 
-  { label: "Firefox/updater.exe",  hearts:0,heartbreaks:250 ,weight: 243160
+  { label: "4",  hearts:0,heartbreaks:100 ,views: 1,post:{
+    title:"",
+    body:"",
+    comment:{},
+    hashtags:""
+  }
   }, 
-  { label: "Firefox/update.locale",  hearts:0,heartbreaks:120 ,weight: 43020
+   { label: "6",  hearts:0,heartbreaks:100  ,views: 1,post:{
+    title:"",
+    body:"",
+    comment:[],
+    hashtags:""
+  }
   },
-  { label: "Firefox/update.locale",  hearts:0,heartbreaks:1 ,weight: 6
+  { label: "5",  hearts:0,heartbreaks:1 ,views: 1,post:{
+    title:"",
+    body:"",
+    comment:{},
+    hashtags:""
+  }
   },
+ 
   
    ]}
