@@ -6,6 +6,23 @@
  * Published under "Eclipse Public License - v 1.0"
  * http://www.eclipse.org/legal/epl-v10.html
  */
+/*
+ * Sravana K Cheriyala, 2014-12-07
+ *
+ * Modified below 
+      1.Added color information within the rectangle object
+      2.Compute will return parent rectangle object
+      3.Added method to take screen sizes 
+
+ * 
+ * Published under "Eclipse Public License - v 1.0"
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+ /**
+
+
+
+
 
 /*
  * Tree Map widget which renders a weighted tree model
@@ -37,10 +54,40 @@ module.exports.TreeMap = function() {
 
 
 
-  var colorProvider = new ColorProvider('#000080');
+  var colorProvider = {
+  getColor: function(node) {
+
+  var hearts     = node.hearts;
+    var heartBreaks = node.heartbreaks;
+
+
+    var colorWeight= hearts/(hearts+heartBreaks);
+     var result = "#FCB617";
+
+      if (colorWeight<=1 && colorWeight>=.85714284 ) {
+        result = "#009345";
+      } else if (colorWeight>=.7142857 && colorWeight<=.85714284) {
+        result = "#8BC53F";
+      } else if (colorWeight>=.57142856 && colorWeight<=.7142857) {
+        result = "#FCB617";
+      } else if (colorWeight>=.42857142 && colorWeight<=.57142856) {
+        result = "#DB801C";
+      } else if (colorWeight>=.28571428 && colorWeight<=.42857142) {
+        result = "#B94718";
+      } else if (colorWeight>=.14285714 && colorWeight<=.28571428) {
+        result = "#921E1E";
+      }
+      else if (colorWeight>=0 && colorWeight<=.14285714) {
+        result = "#921E1E";
+      }
+    
+    return result;
+  }
+};
+
   var renderer = new RectangleRenderer();
     /** private members **/
-  var layout=null;// = new SquarifiedLayout(2,colorProvider);
+  var layout= new SquarifiedLayout(2,colorProvider);
   var listeners = [];
   var rectangles;
   var currentRect;
@@ -259,6 +306,19 @@ module.exports.TreeMap = function() {
     }
     return rectangles;
   };
+
+
+  /*
+   * computes the layout rectangles to be painted
+   */
+  this.compute = function(width ,height) {
+    if (treeModel && currentNode) {
+      rectangles = layout.layout(treeModel, currentNode,width , height);
+      currentRect = undefined;
+    }
+    return rectangles;
+  };
+
 
   /*
    * event handling method; deals with mouse movement
