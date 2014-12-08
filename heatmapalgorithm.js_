@@ -1,0 +1,417 @@
+/*******************************************************************************
+ * Copyright (c) 2013 Evan Carey,
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *    Evan Carey
+ *    Bryan Grohman
+ *******************************************************************************/ 
+
+
+//
+// Treemap utilities
+//
+var TreemapUtils = TreemapUtils || {};
+
+/**
+* KeySpline - use bezier curve for transition easing function
+* is inspired from Firefox's nsSMILKeySpline.cpp
+* Usage:
+* var spline = new KeySpline(0.25, 0.1, 0.25, 1.0)
+* spline.get(x) => returns the easing value | x must be in [0, 1] range
+*
+* From: http://blog.greweb.fr/2012/02/bezier-curve-based-easing-functions-from-concept-to-implementation/
+* Author: Gaëtan Renaudeau
+*/
+/**
+* Evan Carey: Modified to accept options object as argument
+*/
+TreemapUtils.KeySpline = function (options) {
+
+  // defaults to linear easing
+  var mX1 = options.mX1 || 0.00;
+  var mY1 = options.mY1 || 0.0;
+  var mX2 = options.mX2 || 1.00;
+  var mY2 = options.mY2 || 1.0;
+
+  this.get = function(aX) {
+    if (mX1 == mY1 && mX2 == mY2) return aX; // linear
+    return CalcBezier(GetTForX(aX), mY1, mY2);
+  }
+
+  function A(aA1, aA2) { return 1.0 - 3.0 * aA2 + 3.0 * aA1; }
+  function B(aA1, aA2) { return 3.0 * aA2 - 6.0 * aA1; }
+  function C(aA1)      { return 3.0 * aA1; }
+
+  // Returns x(t) given t, x1, and x2, or y(t) given t, y1, and y2.
+  function CalcBezier(aT, aA1, aA2) {
+    return ((A(aA1, aA2)*aT + B(aA1, aA2))*aT + C(aA1))*aT;
+  }
+
+  // Returns dx/dt given t, x1, and x2, or dy/dt given t, y1, and y2.
+  function GetSlope(aT, aA1, aA2) {
+    return 3.0 * A(aA1, aA2)*aT*aT + 2.0 * B(aA1, aA2) * aT + C(aA1);
+  }
+
+  function GetTForX(aX) {
+    // Newton raphson iteration
+    var aGuessT = aX;
+    for (var i = 0; i < 4; ++i) {
+      var currentSlope = GetSlope(aGuessT, mX1, mX2);
+      if (currentSlope == 0.0) return aGuessT;
+      var currentX = CalcBezier(aGuessT, mX1, mX2) - aX;
+      aGuessT -= currentX / currentSlope;
+    }
+    return aGuessT;
+  }
+};
+
+TreemapUtils.Easing = {
+    "ease":        {mX1 : 0.25, mY1 : 0.1, mX2 : 0.25, mY2 : 1.0}, 
+    "linear":      {mX1 : 0.00, mY1 : 0.0, mX2 : 1.00, mY2 : 1.0},
+    "ease-in":     {mX1 : 0.42, mY1 : 0.0, mX2 : 1.00, mY2 : 1.0},
+    "ease-out":    {mX1 : 0.00, mY1 : 0.0, mX2 : 0.58, mY2 : 1.0},
+    "ease-in-out": {mX1 : 0.42, mY1 : 0.0, mX2 : 0.58, mY2 : 1.0}
+};
+
+//
+// sumArray is copied from: 
+// http://stackoverflow.com/questions/3762589/fastest-javascript-summation
+// 
+TreemapUtils.sumArray = (function() {
+    // Use one adding function rather than create a new one each
+    // time sumArray is called.
+    function add(a,b) {
+        return a + b;
+    }
+    return function(arr) {
+        return arr.reduce(add);
+    };
+}());
+
+//
+// deepCopy is copied from:
+// http://james.padolsey.com/javascript/deep-copying-of-objects-and-arrays/
+//
+TreemapUtils.deepCopy = function(obj) {
+    if (Object.prototype.toString.call(obj) === '[object Array]') {
+        var out = [], i = 0, len = obj.length;
+        for ( ; i < len; i++ ) {
+            out[i] = arguments.callee(obj[i]);
+        }
+        return out;
+    }
+    if (typeof obj === 'object') {
+        var out = {}, i;
+        for ( i in obj ) {
+            out[i] = arguments.callee(obj[i]);
+        }
+        return out;
+    }
+    return obj;
+};
+
+//
+// Color shifting algo from: http://stackoverflow.com/questions/1507931/generate-lighter-darker-color-in-css-using-javascript
+// 
+// Modified to use the lpad function defined below.
+//
+// Exmaple Usage
+// var darker = darkerColor('rgba(80, 75, 52, .5)', .2);
+// var lighter = lighterColor('rgba(80, 75, 52, .5)', .2);
+
+//var pad = function(num, totalChars) {
+//    var pad = '0';
+//    num = num + '';
+//    while (num.length < totalChars) {
+//        num = pad + num;
+//    }
+//    return num;
+//};
+
+// Ratio is between 0 and 1
+TreemapUtils.changeColor = function(color, ratio, darker) {
+    // Trim trailing/leading whitespace
+    color = color.replace(/^\s*|\s*$/, '');
+
+    // Expand three-digit hex
+    color = color.replace(
+        /^#?([a-f0-9])([a-f0-9])([a-f0-9])$/i,
+        '#$1$1$2$2$3$3'
+    );
+
+    // Calculate ratio
+    var difference = Math.round(ratio * 256) * (darker ? -1 : 1),
+        // Determine if input is RGB(A)
+        rgb = color.match(new RegExp('^rgba?\\(\\s*' +
+            '(\\d|[1-9]\\d|1\\d{2}|2[0-4][0-9]|25[0-5])' +
+            '\\s*,\\s*' +
+            '(\\d|[1-9]\\d|1\\d{2}|2[0-4][0-9]|25[0-5])' +
+            '\\s*,\\s*' +
+            '(\\d|[1-9]\\d|1\\d{2}|2[0-4][0-9]|25[0-5])' +
+            '(?:\\s*,\\s*' +
+            '(0|1|0?\\.\\d+))?' +
+            '\\s*\\)$'
+        , 'i')),
+        alpha = !!rgb && rgb[4] !== null ? rgb[4] : null,
+
+        // Convert hex to decimal
+        decimal = !!rgb? [rgb[1], rgb[2], rgb[3]] : color.replace(
+            /^#?([a-f0-9][a-f0-9])([a-f0-9][a-f0-9])([a-f0-9][a-f0-9])/i,
+            function(x, a, b, c) {
+                return parseInt(a, 16) + ',' +
+                    parseInt(b, 16) + ',' +
+                    parseInt(c, 16);
+            }
+        ).split(/,/),
+        returnValue;
+
+    // Return RGB(A)
+    return !!rgb ?
+        'rgb' + (alpha !== null ? 'a' : '') + '(' +
+            Math[darker ? 'max' : 'min'](
+                parseInt(decimal[0], 10) + difference, darker ? 0 : 255
+            ) + ', ' +
+            Math[darker ? 'max' : 'min'](
+                parseInt(decimal[1], 10) + difference, darker ? 0 : 255
+            ) + ', ' +
+            Math[darker ? 'max' : 'min'](
+                parseInt(decimal[2], 10) + difference, darker ? 0 : 255
+            ) +
+            (alpha !== null ? ', ' + alpha : '') +
+            ')' :
+        // Return hex
+        [
+            '#',
+            Math[darker ? 'max' : 'min'](
+                parseInt(decimal[0], 10) + difference, darker ? 0 : 255
+            ).toString(16).lpad("0",2),
+            Math[darker ? 'max' : 'min'](
+                parseInt(decimal[1], 10) + difference, darker ? 0 : 255
+            ).toString(16).lpad("0",2),
+            Math[darker ? 'max' : 'min'](
+                parseInt(decimal[2], 10) + difference, darker ? 0 : 255
+            ).toString(16).lpad("0",2)
+        ].join('');
+};
+
+TreemapUtils.lighterColor = function(color, ratio) {
+    return TreemapUtils.changeColor(color, ratio, false);
+};
+
+TreemapUtils.darkerColor = function(color, ratio) {
+    return TreemapUtils.changeColor(color, ratio, true);
+};
+
+TreemapUtils.rgb2hex = function(rgb) {
+    var str = "#"+((rgb[2]|(rgb[1]<<8)|(rgb[0]<<16)).toString(16).lpad("0",6));
+    return str;
+};
+
+TreemapUtils.avgRgb = function(rgb) {
+    return Math.floor(TreemapUtils.sumArray(rgb)/3);
+};
+
+TreemapUtils.hex2rgb = function(color) {
+    // Convert hex to decimal
+    return color.replace(
+        /^#?([a-f0-9][a-f0-9])([a-f0-9][a-f0-9])([a-f0-9][a-f0-9])/i,
+        function(x, a, b, c) {
+            return parseInt(a, 16) + ',' +
+                parseInt(b, 16) + ',' +
+                parseInt(c, 16);
+        }
+    ).split(/,/); // return array
+};
+
+
+//object structure of postData is 
+//[{hearts:
+//  brokenHearts:
+//  view:},{
+//  hearts:
+//  brokenHearts:
+//  view:}
+//]
+TreemapUtils.squarify = function(rect,postsData){
+
+    return {
+        
+    };
+
+};
+
+//
+// Treemap squarify layout function.
+//  rect - containing rectangle; an array of 4 values x, y, width, height
+//  vals - array of (normalized) float values each representing percent contribution to total area of containing rectangle
+//
+// Non-recursive implementation of the squarify treemap layout algorithm published in:
+// "Squarified Treemaps" by Mark Bruls, Kees Huizing and Jarke J. van Wijk
+// http://www.win.tue.nl/~vanwijk/stm.pdf
+//
+// Includes tips and tricks from:
+// http://ejohn.org/blog/fast-javascript-maxmin/#postcomment
+//
+
+TreemapUtils.squarify = function(rect,vals) {
+
+    // "We assume a datatype Rectangle that contains the layout during the computation and
+    // is global to the procedure squarify. It supports a function width() that gives the length of
+    // the shortest side of the remaining subrectangle in which the current row is placed and a
+    // function layoutrow() that adds a new row of children to the rectangle." - Bruls et. al.
+    var Subrectangle = function(rect) {
+        this.setX = function(x) {
+            rect[2] -= x - rect[0];
+            rect[0] = x;
+        };
+        this.setY = function(y) {
+            rect[3] -= y - rect[1];
+            rect[1] = y;
+        };
+        this.getX = function() {
+            return rect[0];
+        };
+        this.getY = function() {
+            return rect[1];
+        };
+        this.getW = function() {
+            return rect[2];
+        };
+        this.getH = function() {
+            return rect[3];
+        };
+        this.getWidth = function() {
+            return Math.min(rect[2],rect[3]);
+        };
+    };
+
+    //
+    // "The function worst() gives the highest aspect ratio of a list 
+    // of rectangles, given the length of the side along which they are to
+    // be laid out.
+    // ...
+    // Let a list of areas R be given and let s be their total sum. Then the function worst is
+    // defined by:
+    // worst(R,w) = max(max(w^2r=s^2; s^2=(w^2r)))
+    //              for all r in R 
+    // Since one term is increasing in r and the other is decreasing, this is equal to
+    //              max(w^2r+=(s^2); s^2=(w^2r-))
+    // where r+ and r- are the maximum and minimum of R. 
+    // Hence, the current maximum and minimum of the row that is being laid out." - Bruls et. al.
+    // 
+    var worst = function(r,w) {
+        var rMax = Math.max.apply(null,r);
+        var rMin = Math.min.apply(null,r);
+        var s = TreemapUtils.sumArray(r);
+        var sSqr = s*s;
+        var wSqr = w*w;
+        return Math.max((wSqr*rMax)/sSqr,sSqr/(wSqr*rMin));
+    };
+
+    // Take row of values and calculate the set of rectangles 
+    // that will fit in the current subrectangle.
+    var layoutrow = function(row) {
+        var x = subrect.getX(),
+            y = subrect.getY(),
+            maxX = x + subrect.getW(),
+            maxY = y + subrect.getH(),
+            rowHeight,
+            i,
+            w;
+
+        if (subrect.getW() < subrect.getH()) {
+            rowHeight = Math.ceil(TreemapUtils.sumArray(row)/subrect.getW());
+            if (y+rowHeight >= maxY) { rowHeight = maxY-y; }
+            for (i = 0; i < row.length; i++) {
+                w = Math.ceil(row[i]/rowHeight);
+                if (x+w > maxX || i+1 === row.length) { w = maxX-x; }
+                layout.push([x,y,w,rowHeight]);
+                x = (x+w);
+            }
+            subrect.setY(y+rowHeight);
+        } else {
+            rowHeight = Math.ceil(TreemapUtils.sumArray(row)/subrect.getH());
+            if (x+rowHeight >= maxX) { rowHeight = maxX-x; }
+            for (i = 0; i < row.length; i++) {
+                w = Math.ceil(row[i]/rowHeight);
+                if (y+w > maxY || i+1 === row.length) { w = maxY-y; }
+                layout.push([x,y,rowHeight,w]);
+                y = (y+w);
+            }
+            subrect.setX(x+rowHeight);
+        }
+    };
+
+    // Pull values from input array until the aspect ratio of rectangles in row
+    // under construction degrades.
+    var buildRow = function(children) {
+        var row = [];
+        row.push(children.shift()); // descending input
+        //row.push(children.pop()); // ascending input
+        if (children.length === 0) {
+            return row;
+        }
+        var newRow = row.slice();
+        var w = subrect.getWidth();
+        do {
+            newRow.push(children[0]); // descending input
+            //newRow.push(children[children.length-1]); // ascending input
+            if (worst(row,w) > worst(newRow,w)){
+                row = newRow.slice();
+                children.shift(); // descending input
+                //children.pop(); // ascending input
+            }
+            else {
+                break;
+            }
+        } while (children.length > 0);
+        return row;
+    };
+
+    // Non recursive version of Bruls, Huizing and van Wijk
+    // squarify layout algorithim.
+    // While values exist in input array, make a row with good aspect
+    // ratios for its values then caclulate the row's geometry, repeat.
+    var nrSquarify = function(children) {
+        do {
+            layoutrow(buildRow(children));
+        } while (children.length > 0) 
+    };
+
+    var row = [];
+    var layout = [];
+    var newVals = [];
+    var i;
+
+    // if either height or width of containing rect are <= 0 simply copy containing rect to layout rects
+    if (rect[2] <= 0 || rect[3] <= 0) {
+        for (i = 0; i < vals.length; i++) {
+            layout.push(rect.slice());
+        }
+    } else { // else compute squarified layout
+        // vals come in normalized. convert them here to make them relative to containing rect
+        newVals = vals.map(function(item){return item*(rect[2]*rect[3]);}); 
+        var subrect = new Subrectangle(rect.slice());
+        nrSquarify(newVals);
+    }
+    return layout;
+};
+exports.Treemap = TreemapUtils;
+
+exports.skewVals=function (a) {
+                if (Object.getOwnPropertyNames(that.options.postProcessCurve).length !== 0) {
+                    var i;
+                    for (i = 0; i < a.length; i++) {
+                        a[i] = spline.get(a[i]);
+                    }
+                    var sum = TreemapUtils.sumArray(a);
+                    for (i = 0; i < a.length; i++) {
+                        a[i] = a[i]/sum;
+                    }
+                }
+                return a;
+            };
