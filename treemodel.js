@@ -5,8 +5,8 @@
  *
  * e.g. { "label": "root", "weight": 4, "children": [{ "label": "only-child", "weight": 4, "children": [] }] }
  */
-module.exports.JSONTreeModel = function (treeRep) {
-
+//module.exports.JSONTreeModel = function (treeRep) {
+JSONTreeModel = function (treeRep) {
   /** private members **/
   var root = treeRep;
 

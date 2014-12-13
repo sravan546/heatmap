@@ -1,0 +1,40 @@
+
+<!-- saved from url=(0064)http://treemaplib.googlecode.com/svn/trunk/TreeMapJS/sample.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>TreeMap JS Sample</title>
+<script src="heatmapalgorithm.js"></script>
+<script src="smallData.js"></script>
+<script src="treemodel.js"></script>
+<style>body { font-family: sans-serif; }</style>
+</head>
+<body>
+
+<canvas id="samplecanvas" width="1200px" height="1200px" oncontextmenu="return false;">
+Your browser does not support the &lt;canvas &gt; element. Sorry.
+</canvas>
+
+
+
+
+<script type="text/javascript">
+
+var heatMap = new TreeMap();
+console.log(data);
+
+
+var treerep = function(){
+	return data;
+}
+
+ var treeModel = new JSONTreeModel(data);
+     heatMap.setTreeModel(treeModel);
+     console.log(heatMap.compute(350,600).getRoot()); 
+      heatMap.hook(document.getElementById("samplecanvas"));
+
+ heatMap.paint();
+
+
+
+</script>
+
+</body></html>

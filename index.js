@@ -14,6 +14,6 @@ var heatMap = new heatmapModule.TreeMap();
 
 
  var treeModel = new treemodel.JSONTreeModel(new Function("return "+data)());
-    heatMap.setTreeModel(treeModel);
+     heatMap.setTreeModel(treeModel);
      console.log(heatMap.compute(300,700).getRoot()); 
 

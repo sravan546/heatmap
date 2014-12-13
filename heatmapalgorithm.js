@@ -45,8 +45,9 @@
  *
  * Finally: You might want to serve this file in a minified version.
  */
-module.exports.TreeMap = function() {
+//module.exports.TreeMap = function() {
 
+TreeMap = function() {
 
 
   var colorProvider = {
@@ -401,6 +402,9 @@ function RectangleRenderer() {
   this.render = function(context, rectangleModel, rectangle, colorProvider) {
     context.fillStyle = colorProvider.getColor(rectangle.node);
     context.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
+    context.font = '40px Calibri';
+      context.fillStyle = 'blue';
+    context.fillText(rectangle.label,rectangle.x+20, rectangle.y+50);
   };
   
   /*
@@ -476,90 +480,90 @@ function CushionRectangleRenderer() {
  *
  * e.g. { "label": "root", "weight": 4, "children": [{ "label": "only-child", "weight": 4, "children": [] }] }
  */
-function JSONTreeModel(treeRep) {
+// function JSONTreeModel(treeRep) {
 
-  /** private members **/
-  var root = treeRep;
+//   /** private members **/
+//   var root = treeRep;
 
-  /** privileged methods **/
+//   /** privileged methods **/
   
-  /*
-   * returns the root node
-   */
-  this.getRoot = function() {
-    return root;
-  };
+//   /*
+//    * returns the root node
+//    */
+//   this.getRoot = function() {
+//     return root;
+//   };
 
-  /*
-   * returns the children of the given node
-   */ 
-  this.getChildren = function(node) {  
-    if (node.children && node.children.length) {
-      return node.children;
-    } else {
-      return [];
-    }
-  };
+//   /*
+//    * returns the children of the given node
+//    */ 
+//   this.getChildren = function(node) {  
+//     if (node.children && node.children.length) {
+//       return node.children;
+//     } else {
+//       return [];
+//     }
+//   };
   
-  /*
-   * indicates if the given node has children or not
-   */ 
-  this.hasChildren = function(node) {
-    if (node.children && node.children.length && node.children.length>0) {
-      return true;
-    } else {
-      return false;
-    }
-  };
+//   /*
+//    * indicates if the given node has children or not
+//    */ 
+//   this.hasChildren = function(node) {
+//     if (node.children && node.children.length && node.children.length>0) {
+//       return true;
+//     } else {
+//       return false;
+//     }
+//   };
   
-  /*
-   * returns the parent node for the given node
-   */
-  this.getParent = function(node) {
-    return node._parent;  // public members access; ugly
-  };
+//   /*
+//    * returns the parent node for the given node
+//    */
+//   this.getParent = function(node) {
+//     return node._parent;  // public members access; ugly
+//   };
 
-  /*
-   * returns the weight of the given node
-   */  
-  this.getViews = function(node) {
-    if (node.views) {
-      return node.views;
-    } else {
-      return 0;
-    }
-  };
+//   /*
+//    * returns the weight of the given node
+//    */  
+//   this.getViews = function(node) {
+//     if (node.views) {
+//       return node.views;
+//     } else {
+//       return 0;
+//     }
+//   };
   
-  /*
-   * returns the label of the given node
-   */  
-  this.getLabel = function(node) {
-    if (node.label) {
-      return node.label;
-    } else {
-      return "";
-    }
-  };
+//   /*
+//    * returns the label of the given node
+//    */  
+//   this.getLabel = function(node) {
+//     if (node.label) {
+//       return node.label;
+//     } else {
+//       return "";
+//     }
+//   };
   
-  /** private methods */
+//   /** private methods */
   
-  // recursively builds the parent/child relationships
-  function _build(_lst, _parent) {
-    for (var i = 0; i < _lst.length; i++) {
-      var node = _lst[i];
-      node._parent = _parent;  // public assign of parent; ugly 
-      if (node.children) {
-        _build(node.children, node);
-      }
-    }
-  }
+//   // recursively builds the parent/child relationships
+//   function _build(_lst, _parent) {
+//     for (var i = 0; i < _lst.length; i++) {
+//       var node = _lst[i];
+//       node._parent = _parent;  // public assign of parent; ugly 
+//       if (node.children) {
+//         _build(node.children, node);
+//       }
+//     }
+//   }
 
-  // initialization
-  if (treeRep.children) {
-    _build(treeRep.children, treeRep);
-  }
+//   // initialization
+//   if (treeRep.children) {
+//     _build(treeRep.children, treeRep);
+//   }
   
-}
+// }
 
 /*
  * tree model, basing on a XML document
