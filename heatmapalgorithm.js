@@ -58,7 +58,7 @@ TreeMap = function() {
 
 
     var colorWeight= hearts/(hearts+heartBreaks);
-     var result = "#FCB617";
+     //var result = "#FCB617";
 
       if (colorWeight<=1 && colorWeight>=.85714284 ) {
         result = "#009345";
@@ -67,11 +67,11 @@ TreeMap = function() {
       } else if (colorWeight>=.57142856 && colorWeight<=.7142857) {
         result = "#FCB617";
       } else if (colorWeight>=.42857142 && colorWeight<=.57142856) {
-        result = "#DB801C";
+        result = "#FFDD17";
       } else if (colorWeight>=.28571428 && colorWeight<=.42857142) {
-        result = "#B94718";
+        result = "#DB801C";
       } else if (colorWeight>=.14285714 && colorWeight<=.28571428) {
-        result = "#921E1E";
+        result = "#B94718";
       }
       else if (colorWeight>=0 && colorWeight<=.14285714) {
         result = "#921E1E";
@@ -402,8 +402,8 @@ function RectangleRenderer() {
   this.render = function(context, rectangleModel, rectangle, colorProvider) {
     context.fillStyle = colorProvider.getColor(rectangle.node);
     context.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-    context.font = '40px Calibri';
-      context.fillStyle = 'blue';
+    context.font = '20px cutive';
+      context.fillStyle = 'white';
     context.fillText(rectangle.label,rectangle.x+20, rectangle.y+50);
   };
   
@@ -672,7 +672,8 @@ function _WeightComparator(treeModel) {
    * sorts nodes based on their weight
    */
   this.sortFunction = function(a, b) {
-    return model.getViews(b) - model.getViews(a);
+   return model.getViews(b) - model.getViews(a);
+//return model.getViews(a) - model.getViews(b);
   }
 
   /*
@@ -866,7 +867,7 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
   function _fit(rect, weight, total) {
     var s = rect[0]<rect[1]?rect[0]:rect[1];
 	var l = rect[0]<rect[1]?rect[1]:rect[0];
-	rect[0] = weight*l/total;
+	rect[0] = weight*l/total; 
 	rect[1] = s;
 	if (rect[0] == 0) {
 	  // sanitize to avoid bogus aspect
