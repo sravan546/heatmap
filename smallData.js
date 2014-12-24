@@ -1,21 +1,21 @@
-var data7={ 
+{ 
   label: "Firefox",  hearts:0,heartbreaks:1 ,views: 6000, 
   children: [
-  { label: "1",  hearts:300,heartbreaks:500 ,views: 857,post:{
+  { label: "1",  hearts:300,heartbreaks:500 ,views: 10,post:{
     title:"",
     body:"",
     comment:[],
     hashtags:""
   }
   }, 
-  { label: "2",  hearts:1,heartbreaks:600 ,views: 857,post:{
+  { label: "2",  hearts:1,heartbreaks:600 ,views: 10,post:{
     title:"",
     body:"",
     comment:[],
     hashtags:""
   }
   }, 
-  { label: "3",  hearts:100,heartbreaks:30 ,views: 857,post:{
+  { label: "3",  hearts:100,heartbreaks:30 ,views: 3000,post:{
     title:"",
     body:"",
     comment:{},
@@ -42,7 +42,7 @@ var data7={
     comment:{},
     hashtags:""
   }}
-  ,{ label: "7",  hearts:800,heartbreaks:2 ,views: 857,post:{
+  ,{ label: "7",  hearts:800,heartbreaks:2 ,views: 40,post:{
     title:"",
     body:"",
     comment:{},

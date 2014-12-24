@@ -47,7 +47,9 @@
  */
 //module.exports.TreeMap = function() {
 
-TreeMap = function() {
+  var treemodel = require("./treeModel.js");
+
+module.exports.TreeMap = function() {
 
 
   var colorProvider = {
@@ -740,7 +742,7 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
    */
   this.layout = function(treeModel, startNode, width, height) {
     var root = new _Rectangle(startNode, 0, 0, width, height,colorProvider.getColor(startNode));
-    var result = new JSONTreeModel(root);
+    var result = new treemodel.JSONTreeModel(root);
     var comparator = new _WeightComparator(treeModel);
     _layout(result, root, comparator, 0);
     return result;
