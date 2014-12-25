@@ -1,3 +1,5 @@
+var maxviewcount 
+
 var data6={ 
   label: "Firefox",  hearts:0,heartbreaks:1 ,views: 6000  , 
   children: [

@@ -1,6 +1,6 @@
 var treemodel = require("./treeModel.js");
 
-//test cases
+//**********test cases**********
 //6 posts
 //more than 6 posts
 //all max cases
@@ -13,8 +13,13 @@ var treemodel = require("./treeModel.js");
 //5 max cases
 //6 max cases
 //3,4,5,6 near max case
-
 //boundry conditions
+
+//************remaining tasks **************
+//create new json file in case of less than 6
+//keep leftover nodes in new json 
+//check if leftover json has any node if so append it to new json 
+
 
 module.exports.ViewCorrecter= function(){
 
@@ -28,9 +33,12 @@ module.exports.ViewCorrecter= function(){
 		//console.log("nodes length" + nodes.length);
 		var i=0;
 		var collectiveViewCount =0;
-	while(i<=nodes.length-1)
+		var output =[];
+		var length=nodes.length-1;
+		while(i<=length)
 		{
 			var n = nodes[i];
+			output[i]=n;
 			var viewCount = n.views;
 			if(viewCount < idealMinViewCount)
 			{
@@ -40,30 +48,27 @@ module.exports.ViewCorrecter= function(){
 			else if(viewCount > idealMaxViewCount){
 				n.views=idealMaxViewCount;
 				collectiveViewCount+=idealMaxViewCount;
-
 			}
 			else
-			{
-				
+			{	
 				collectiveViewCount+=viewCount;
 			}
-
-			if(collectiveViewCount>maxViewsCount && i<=5)
-			{
-				
+			if(collectiveViewCount>maxViewsCount)
+			{	
 				maxViewsCount=collectiveViewCount;
-				if(i==5){
+			//	if(i==5){
 					currentNode.views=maxViewsCount;
-					break;
-				} 
-
+					if(i<6){
+						length=5;
+					} 
+					
+			//	} 
 			}
-
 			//console.log("view counts" + viewCount);
 			i++;
 		}
-		console.log(currentNode);
-		
+		treemodel.getRoot().children=output;
+		console.log(treemodel.getRoot());		
 	};
 
 };
