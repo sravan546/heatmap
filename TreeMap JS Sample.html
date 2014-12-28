@@ -4,8 +4,9 @@
 <title>TreeMap JS Sample</title>
 <script src="heatmapalgorithm.js"></script>
 <script src="smallData.js"></script>
-<script src="smalldata_2.js"></script>
+<!--<script src="smalldata_2.js"></script>-->
 <script src="treemodel.js"></script>
+<script src="viewandfontcorrection.js"></script>
 <style>body { font-family: sans-serif; }</style>
 </head>
 <body>
@@ -22,33 +23,33 @@ Your browser does not support the &lt;canvas &gt; element. Sorry.
 
 </table>
 
+   <script type="text/javascript">
+            (function() {
+                var link_element = document.createElement("link"),
+                    s = document.getElementsByTagName("script")[0];
+                if (window.location.protocol !== "http:" && window.location.protocol !== "https:") {
+                    link_element.href = "http:";
+                }
+                link_element.href += "//fonts.googleapis.com/css?family=Cutive:400";
+                link_element.rel = "stylesheet";
+                link_element.type = "text/css";
+                s.parentNode.insertBefore(link_element, s);
+            })();
+        </script>
 
 
 
 
 <script type="text/javascript">
-
-// var heatMap7 = new TreeMap();
-
-//  var treeModel7 = new JSONTreeModel(data7);
-//      heatMap7.setTreeModel(treeModel7);
-//      console.log(heatMap7.compute(270,470).getRoot()); 
-//       heatMap7.hook(document.getElementById("samplecanvas7"));
-
-//  heatMap7.paint();
-
-
-
 var heatMap6 = new TreeMap();
-console.log(data6);
- var treeModel6 = new JSONTreeModel(data6);
-     heatMap6.setTreeModel(treeModel6);
+     var treeModel6 = new JSONTreeModel(data6);
+     var corrector=new ViewCorrecter();
+	 corrector.correctViews(treeModel6);
+	 heatMap6.setTreeModel(treeModel6);
      console.log(heatMap6.compute(270,470).getRoot()); 
-      heatMap6.hook(document.getElementById("samplecanvas6"));
-
- heatMap6.paint();
-
-
+     heatMap6.hook(document.getElementById("samplecanvas6"));
+ 	 heatMap6.paint();
+	 console.log(treeModel6.getRoot());
 </script>
 
 </body></html>

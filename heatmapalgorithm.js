@@ -47,14 +47,16 @@
  */
 //module.exports.TreeMap = function() {
 
-  var treemodel = require("./treeModel.js");
+ // var treemodel = require("./treeModel.js");
 
-module.exports.TreeMap = function() {
+//module.exports.
+TreeMap = function() {
 
 
   var colorProvider = {
   getColor: function(node) {
 
+    if(node.hasOwnProperty('children')) return;
     var hearts     = node.hearts;
     var heartBreaks = node.heartbreaks;
 
@@ -404,9 +406,11 @@ function RectangleRenderer() {
   this.render = function(context, rectangleModel, rectangle, colorProvider) {
     context.fillStyle = colorProvider.getColor(rectangle.node);
     context.fillRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
-    context.font = '20px cutive';
+   
+   // contect.fontWeight=""
       context.fillStyle = 'white';
-    context.fillText(rectangle.label,rectangle.x+20, rectangle.y+50);
+   // context.fillText(rectangle.node.post.title,rectangle.x+20, rectangle.y+50);
+   wrapText(context,rectangle.node.post.title,rectangle.x, rectangle.y+30,rectangle.width,25);
   };
   
   /*
@@ -419,6 +423,29 @@ function RectangleRenderer() {
     context.strokeRect(rectangle.x, rectangle.y, rectangle.width, rectangle.height);
   };
   
+
+  function wrapText(context, text, x, y, maxWidth, lineHeight) {
+        var words = text.split(' ');
+        var line = '';
+
+        for(var n = 0; n < words.length; n++) {
+          var testLine = line + words[n] + ' ';
+          var metrics = context.measureText(testLine);
+          var testWidth = metrics.width;
+          if (testWidth > maxWidth && n > 0) {
+            if(n%2==0) context.font = '40px  regular cutive';
+            context.fillText(line, x, y);
+            line = words[n] + ' ';
+            y += lineHeight;
+          }
+          else {
+            line = testLine;
+          }
+        }
+         context.font = '30px  regular cutive';
+        context.fillText(line, x, y);
+      }
+      
 }
 
 /*
@@ -653,6 +680,7 @@ function _Rectangle(node,x,y,width,height,color) {
   this.height = height;
   this.color=color;
   this.label=node.label;
+
   
   /** privileged methods */
 
@@ -742,7 +770,8 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
    */
   this.layout = function(treeModel, startNode, width, height) {
     var root = new _Rectangle(startNode, 0, 0, width, height,colorProvider.getColor(startNode));
-    var result = new treemodel.JSONTreeModel(root);
+   // var result = new treemodel.JSONTreeModel(root);
+   var result = new JSONTreeModel(root);
     var comparator = new _WeightComparator(treeModel);
     _layout(result, root, comparator, 0);
     return result;

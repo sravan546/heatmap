@@ -2,6 +2,12 @@ var maxviewcount
 
 var data6={ 
   label: "Firefox",  hearts:0,heartbreaks:1 ,views: 6000  , 
+  post:{
+    title:"",
+    body:"",
+    comment:[],
+    hashtags:""
+  },
   children: [
   { label: "1",  hearts:300,heartbreaks:500 ,views: 720,post:{
     title:"",
