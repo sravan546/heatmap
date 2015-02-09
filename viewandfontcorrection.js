@@ -63,7 +63,7 @@ ViewCorrecter= function(){
 				} 
 			}
 
-			fixfont(node,maxViewsCount);
+			//fixfont(node,maxViewsCount);
 
 			i++;
 		}
@@ -73,8 +73,31 @@ ViewCorrecter= function(){
 		console.log(treemodel.getRoot());		
 	};
 
-	function fixfont(node,maxViewsCount){
-	//	lines[]  = breakSentence()
-	}
+	// function fixfont(node,maxViewsCount){
+	// //	lines[]  = breakSentence()
+	// }
 
+	  // function wrapText(context, text, x, y, maxWidth, lineHeight) {
+   //      var words = text.split(' ');
+   //      var line = '';
+
+   //      for(var n = 0; n < words.length; n++) {
+   //        var testLine = line + words[n] + ' ';
+   //        var metrics = context.measureText(testLine);
+   //        var testWidth = metrics.width;
+   //        if (testWidth > maxWidth && n > 0) {
+   //          if(n%2==0) context.font = '40px  regular cutive';
+   //          context.fillText(line, x, y);
+   //          line = words[n] + ' ';
+   //          y += lineHeight;
+   //        }
+   //        else {
+   //          line = testLine;
+   //        }
+   //      }
+   //       context.font = '30px  regular cutive';
+   //      context.fillText(line, x, y);
+   //    }
+      
+//
 };

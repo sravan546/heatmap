@@ -1,19 +1,18 @@
 /*
  * Tree Map JS
  *
+ * Jan Engehausen, 2010-08-07
+ *
+ * Published under "Eclipse Public License - v 1.0"
+ * http://www.eclipse.org/legal/epl-v10.html
+ */
+/*
  * Sravana K Cheriyala, 2014-12-07
  *
  * Modified below
  *    1.Added color information within the rectangle object
  *    2.Compute will return parent rectangle object
  *    3.Added method to take screen sizes
- *
- * Jan Engehausen, 2010-08-07
- *
- * Published under "Eclipse Public License - v 1.0"
- * http://www.eclipse.org/legal/epl-v10.html
- *
-
  *
  * Published under "Eclipse Public License - v 1.0"
  * http://www.eclipse.org/legal/epl-v10.html
@@ -52,29 +51,31 @@
 
 //module.exports.
 
-function compute(data,width,height){
+function compute(data){
     var heatMap6 = new TreeMap();
     var treeModel6 = new JSONTreeModel(data);
-    heatMap6.setTreeModel(treeModel6);
-    var root=  heatMap6.compute(width,height).getRoot()
-    heatMap6.hook(document.getElementById("samplecanvas6"));
+   heatMap6.setTreeModel(treeModel6);
+  //  return treeModel6.getLabel();
+  //  var jsonData =  JSON.parse(data);
+    return heatMap6.compute(270,470).getRoot();
+      heatMap6.hook(document.getElementById("samplecanvas6"));
      heatMap6.paint();
-    return root;
- }
+  //  return data;
+}
 
 TreeMap = function() {
     
     var colorProvider = {
     getColor: function(node) {
         
-       // if(node.hasOwnProperty('children')) return;
+        if(node.hasOwnProperty('children')) return;
         var hearts     = node.hearts;
         var heartBreaks = node.heartbreaks;
         
         
         var colorWeight= hearts/(hearts+heartBreaks);
         //var result = "#FCB617";
-        
+        var colorWeight=1;
         if (colorWeight<=1 && colorWeight>=.85714284 ) {
             result = "#009345";
         } else if (colorWeight>=.7142857 && colorWeight<=.85714284) {
@@ -269,7 +270,7 @@ TreeMap = function() {
             }
         }
     };
-      
+    
     
     
     
@@ -353,12 +354,23 @@ TreeMap = function() {
         }
     };
     
-
+    /*
+     * computes the layout rectangles to be painted
+     */
+    this.compute = function() {
+        //    this.correctViews(treeModel);
+        //    if (treeModel && currentNode) {
+        //      rectangles = layout.layout(treeModel, currentNode,600 , 400);
+        //      currentRect = undefined;
+        //    }
+        //    return rectangles;
+    };
+    
+    
     /*
      * computes the layout rectangles to be painted
      */
     this.compute = function(width ,height) {
-       // consoleLog(treeModel.getRoot());
         this.correctViews(treeModel);
         if (treeModel && currentNode) {
             rectangles = layout.layout(treeModel, currentNode,width , height);
@@ -454,8 +466,6 @@ function RectangleRenderer() {
         
         // contect.fontWeight=""
         context.fillStyle = 'white';
-            var fontSize=(rectangle.width * rectangle.height) * .0009
-            context.font = fontSize+'px Cutive';
         // context.fillText(rectangle.node.post.title,rectangle.x+20, rectangle.y+50);
         wrapText(context,rectangle.node.post.title,rectangle.x, rectangle.y+30,rectangle.width,25);
     };
@@ -477,7 +487,7 @@ function RectangleRenderer() {
         
         for(var n = 0; n < words.length; n++) {
             //context.font = '40px Cutive';
-        
+            context.font = '20px Cutive';
             var testLine = line + words[n] + ' ';
             var metrics = context.measureText(testLine);
             var testWidth = metrics.width;
@@ -569,13 +579,99 @@ function _Rectangle(node,x,y,width,height,color) {
     this.height = height;
     this.color=color;
     this.label=node.label;
-    this.children=[];
     
     
     /** privileged methods */
     
     
 };
+
+
+
+JSONTreeModel = function (treeRep) {
+    /** private members **/
+    var root = treeRep;
+    
+    /** privileged methods **/
+    
+    /*
+     * returns the root node
+     */
+    this.getRoot = function() {
+        return root;
+    };
+    
+    /*
+     * returns the children of the given node
+     */
+    this.getChildren = function(node) {
+        if (node.children && node.children.length) {
+            return node.children;
+        } else {
+            return [];
+        }
+    };
+    
+    /*
+     * indicates if the given node has children or not
+     */
+    this.hasChildren = function(node) {
+        if (node.children && node.children.length && node.children.length>0) {
+            return true;
+        } else {
+            return false;
+        }
+    };
+    
+    /*
+     * returns the parent node for the given node
+     */
+    this.getParent = function(node) {
+        return node._parent;  // public members access; ugly
+    };
+    
+    /*
+     * returns the weight of the given node
+     */
+    this.getViews = function(node) {
+        if (node.views) {
+            return node.views;
+        } else {
+            return 0;
+        }
+    };
+    
+    /*
+     * returns the label of the given node
+     */
+    this.getLabel = function(node) {
+        if (node.label) {
+            return node.label;
+        } else {
+            return "";
+        }
+    };
+    
+    /** private methods */
+    
+    // recursively builds the parent/child relationships
+    function _build(_lst, _parent) {
+        for (var i = 0; i < _lst.length; i++) {
+            var node = _lst[i];
+            node._parent = _parent;  // public assign of parent; ugly
+            if (node.children) {
+                _build(node.children, node);
+            }
+        }
+    }
+    
+    // initialization
+    if (treeRep.children) {
+        _build(treeRep.children, treeRep);
+    }
+    
+}
+
 
 
 
@@ -829,8 +925,6 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
      */
     this.layout = function(treeModel, startNode, width, height) {
         var root = new _Rectangle(startNode, 0, 0, width, height,colorProvider.getColor(startNode));
-        root.leftOverChildren=startNode.leftOverChildren;
-        delete startNode.leftOverChildren;
         // var result = new treemodel.JSONTreeModel(root);
         var result = new JSONTreeModel(root);
         var comparator = new _WeightComparator(treeModel);
@@ -845,15 +939,12 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
         if (depth < maxDepth) {
             var n = rectangle.node;
             var treeModel = comparator.getTreeModel();
-           // consoleLog(n.children);
             if (treeModel.hasChildren(n)) {
                 var nodes = treeModel.getChildren(n);
-                
                 if (nodes.length > 2) {
                     nodes = nodes.sort(comparator.sortFunction);
                     _layoutNodes(result, rectangle, rectangle, comparator, nodes, 0, nodes.length, treeModel.getViews(n), depth);
                 } else {
-                    
                     _slice(result, rectangle, rectangle, comparator, nodes, 0, nodes.length, treeModel.getViews(n), depth);
                 }
             }
@@ -870,9 +961,7 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
             var rect = [0,0];
             var treeModel = comparator.getTreeModel();
             do {
-                
                 var n = nodes[i++];
-            
                 var nodeWeight = treeModel.getViews(n);
                 sum += nodeWeight;
                 rect[0] = rectangle.width;
@@ -974,8 +1063,7 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
     
     // add a child to the rectangle tree model
     function _addChild(treeModel, parent, child) {
-    //    consoleLog(child);
-        if (parent.hasOwnProperty('children')) {
+        if (parent.children) {
             parent.children.push(child);
         } else {
             parent.children = [child];
@@ -984,95 +1072,6 @@ function SquarifiedLayout(maximumDepth,colorProvider) {
     }
     
 }
-
-
-
-JSONTreeModel = function (treeRep) {
-    /** private members **/
-    var root = treeRep;
-    
-    /** privileged methods **/
-    
-    /*
-     * returns the root node
-     */
-    this.getRoot = function() {
-        return root;
-    };
-    
-    /*
-     * returns the children of the given node
-     */
-    this.getChildren = function(node) {
-        if (node.children && node.children.length) {
-               return node.children;
-           // return "SRAVAN";
-        } else {
-              return [];
-           // return "KUMAR";
-        }
-    };
-    
-    /*
-     * indicates if the given node has children or not
-     */
-    this.hasChildren = function(node) {
-        if (node.children && node.children.length && node.children.length>0) {
-            return true;
-        } else {
-            return false;
-        }
-    };
-    
-    /*
-     * returns the parent node for the given node
-     */
-    this.getParent = function(node) {
-        return node._parent;  // public members access; ugly
-    };
-    
-    /*
-     * returns the weight of the given node
-     */
-    this.getViews = function(node) {
-        if (node.views) {
-            return node.views;
-        } else {
-            return 0;
-        }
-    };
-    
-    /*
-     * returns the label of the given node
-     */
-    this.getLabel = function(node) {
-        if (node.label) {
-            return node.label;
-        } else {
-            return "";
-        }
-    };
-    
-    /** private methods */
-    
-    // recursively builds the parent/child relationships
-    function _build(_lst, _parent) {
-        for (var i = 0; i < _lst.length; i++) {
-            var node = _lst[i];
-            node._parent = _parent;  // public assign of parent; ugly
-            if (node.children) {
-                _build(node.children, node);
-            }
-        }
-    }
-    
-    // initialization
-    if (treeRep.children) {
-        _build(treeRep.children, treeRep);
-    }
-    
-}
-
 
 
 
