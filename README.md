@@ -1,7 +1,7 @@
 heatmap
 =======
 
-This is the heatmap algorithm .Posts increase in size based on weight and changes in color based on likeabilty .This has been developed using node.js
+This is the heatmap algorithm .Posts increase in size based on weight and changes in color based on likeabilty(hearts and hearbreaks ratio) .This is developed using node.js
 
 Usage.
 Object model for inpit data is 
